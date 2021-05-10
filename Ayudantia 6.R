@@ -1,0 +1,84 @@
+library(tidyverse)
+install.packages("cluster")
+library(cluster)
+install.packages("factoextra")
+library(factoextra)
+install.packages("janitor")
+library(janitor)
+
+beats1<- beats
+beats
+beats[beats == ""] <- NA
+
+beats %>% summarise_all(funs(sum(is.na(.))))
+
+beats_pre <- data %>% 
+  filter(!(is.na(track_name)|is.na(track_artist)|is.na(track_album_name)|is.na(duration_ms)))
+
+beats <- beats[!duplicated(beats$track_id),]
+
+beats$track_number <- as.numeric(as.character(beats$track_number))
+
+
+
+
+beats <- beats %>% 
+  filter(!(is.na(track_number)))
+
+
+beats <- beats[!grepl("<U",beats$track_name),]
+beats <- beats[!grepl("<U",beats$artist_name),]
+
+beats %>% count(duplicated(beats$track_name))
+beats %>% distinct(track_name, .keep_all = TRUE, )
+
+beats$duplicate <- duplicated(beats[,c("track_name", "artist_name")])
+
+data_dupli <- beats %>% 
+  filter(beats$duplicate == TRUE) %>% 
+  arrange("track_name", "track_number", desc(track_number))
+
+data_dupli <- data_dupli %>% 
+  distinct(track_name, artist_name, .keep_all = TRUE)
+
+beats <- beats[!(beats$duplicate == TRUE),]
+
+beats <- rbind(beats, data_dupli)
+beats$duplicate <- NULL
+
+
+
+beats$track_id <- as.character(beats$track_id)
+beats$track_name <- as.character(beats$track_name)
+beats$track_artist <- as.character(beats$artist_name)
+beats$track_album_id <- as.character(beats$album_id)
+beats$track_album_name <-  as.character(beats$album_name)
+beats$danceability <- as.double(as.character(beats$danceability))
+beats$energy <- as.double(as.character(beats$energy))
+beats$key <- as.double(as.character(beats$key))
+beats$loudness <- as.double(as.character(beats$loudness))
+beats$mode <- as.double(as.character(beats$mode))
+beats$speechiness <- as.double(as.character(beats$speechiness)) 
+beats$acousticness <- as.double(as.character(beats$acousticness))
+beats$instrumentalness <- as.double(as.character(beats$instrumentalness))
+beats$liveness <- as.double(as.character(beats$liveness))
+beats$valence <- as.double(as.character(beats$valence))
+beats$tempo <- as.double(as.character(beats$tempo))
+beats$duration_ms <- as.double(as.character(beats$duration_ms))
+
+
+data_char <- c("track_id", "track_name", "artist_name", "album_id", "album_name")
+data_dou <- c("track_popularity","danceability", "energy", "key", "loudness", "mode", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "tempo", "duration_ms")
+
+
+beats <- beats %>% 
+  filter(!(is.na(key)|is.na(danceability)))
+summary(beats)
+str(beats)
+
+
+beatsnum <- beats %>% 
+  select(beats)
+beatschar <- beats %>% 
+  select(beats)
+
